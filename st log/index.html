@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Striker's Log — Goal &amp; Assist Tracker</title>
+<meta name="description" content="Log your goals and assists by date and track your career stats." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="pitch-line" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">⚽</span>
+      <div class="brand-text">
+        <h1>Striker's <span>Log</span></h1>
+        <span class="brand-tagline">Official personal performance record</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="btnExport" class="btn btn-ghost" type="button">Export backup</button>
+      <label class="btn btn-ghost file-btn">
+        Import backup
+        <input type="file" id="importFile" accept="application/json" hidden />
+      </label>
+      <button id="btnAdd" class="btn btn-primary" type="button">+ Log entry</button>
+    </div>
+  </div>
+</header>
+
+<div class="id-strip">
+  <div class="wrap id-strip-inner">
+    <div class="id-card">
+      <span class="id-number" id="profileNumber">9</span>
+      <div class="id-info">
+        <strong id="profileName">Your Name</strong>
+        <span id="profileMeta">Forward · Add your club</span>
+      </div>
+    </div>
+    <button id="btnEditProfile" class="btn btn-ghost btn-outline-light" type="button">Edit profile</button>
+  </div>
+</div>
+
+<!-- PROFILE EDIT PANEL -->
+<section class="panel form-panel" id="profilePanel" hidden>
+  <div class="wrap">
+    <form id="profileForm">
+      <h2>Edit profile</h2>
+      <div class="form-grid">
+        <div class="field field-wide">
+          <label for="pName">Player name</label>
+          <input type="text" id="pName" placeholder="e.g. Alex Morgan" />
+        </div>
+        <div class="field field-narrow">
+          <label for="pNumber">Number</label>
+          <input type="number" id="pNumber" min="0" max="99" placeholder="9" />
+        </div>
+        <div class="field">
+          <label for="pPosition">Position</label>
+          <input type="text" id="pPosition" placeholder="e.g. Forward" />
+        </div>
+        <div class="field">
+          <label for="pClub">Club / team</label>
+          <input type="text" id="pClub" placeholder="e.g. Riverside FC" />
+        </div>
+      </div>
+      <div class="form-actions form-actions-split">
+        <button type="button" id="btnClearData" class="btn btn-danger">Clear all data</button>
+        <div class="form-actions">
+          <button type="button" id="btnCancelProfile" class="btn btn-ghost">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save profile</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <!-- HERO / EMPTY STATE -->
+  <section class="hero" id="heroEmpty" aria-label="Get started" hidden>
+    <div class="hero-inner">
+      <span class="eyebrow">Personal season tracker</span>
+      <h2>Your stat sheet is open. Get on the scoresheet.</h2>
+      <p>Every goal and assist you log builds the career scoreboard, season chart and match timeline below — this is your official record, kept right here in your browser.</p>
+      <div class="hero-actions">
+        <button id="btnHeroAdd" class="btn btn-primary">+ Log your first entry</button>
+        <button id="btnDemo" class="btn btn-ghost-dark" type="button">Preview with a sample season</button>
+      </div>
+    </div>
+    <svg class="hero-art" viewBox="0 0 220 220" aria-hidden="true">
+      <rect x="18" y="30" width="160" height="120" fill="none" stroke="#F7F5F0" stroke-width="3" opacity="0.5" />
+      <line x1="18" y1="30" x2="18" y2="150" stroke="#F7F5F0" stroke-width="3" opacity="0.5" />
+      <g stroke="#F7F5F0" stroke-width="1" opacity="0.28">
+        <line x1="18" y1="50" x2="178" y2="50" /><line x1="18" y1="70" x2="178" y2="70" />
+        <line x1="18" y1="90" x2="178" y2="90" /><line x1="18" y1="110" x2="178" y2="110" />
+        <line x1="18" y1="130" x2="178" y2="130" />
+        <line x1="38" y1="30" x2="38" y2="150" /><line x1="58" y1="30" x2="58" y2="150" />
+        <line x1="78" y1="30" x2="78" y2="150" /><line x1="98" y1="30" x2="98" y2="150" />
+        <line x1="118" y1="30" x2="118" y2="150" /><line x1="138" y1="30" x2="138" y2="150" />
+        <line x1="158" y1="30" x2="158" y2="150" />
+      </g>
+      <circle cx="150" cy="165" r="14" fill="#E8A33D" />
+      <path d="M150 155 l4 6 -4 6 -4 -6 z" fill="#1B4332" opacity="0.6" />
+    </svg>
+  </section>
+
+  <!-- SCOREBOARD -->
+  <p class="section-kicker">Career record — updated live</p>
+  <section class="scoreboard" aria-label="Career totals">
+    <div class="score-cell">
+      <span class="score-num" id="statGoals">0</span>
+      <span class="score-label">Goals</span>
+    </div>
+    <div class="score-divider">+</div>
+    <div class="score-cell">
+      <span class="score-num" id="statAssists">0</span>
+      <span class="score-label">Assists</span>
+    </div>
+    <div class="score-divider">=</div>
+    <div class="score-cell score-cell-total">
+      <span class="score-num" id="statGA">0</span>
+      <span class="score-label">G+A</span>
+    </div>
+    <div class="score-cell score-cell-side">
+      <span class="score-num" id="statMatches">0</span>
+      <span class="score-label">Matchdays logged</span>
+    </div>
+  </section>
+
+  <!-- ADD / EDIT FORM -->
+  <section class="panel form-panel" id="formPanel" hidden>
+    <form id="entryForm">
+      <h2 id="formTitle">Log a contribution</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label for="fDate">Date *</label>
+          <input type="date" id="fDate" required />
+        </div>
+        <div class="field">
+          <label for="fType">Type *</label>
+          <select id="fType" required>
+            <option value="goal">Goal</option>
+            <option value="assist">Assist</option>
+          </select>
+        </div>
+        <div class="field field-narrow">
+          <label for="fQty">Count</label>
+          <input type="number" id="fQty" min="1" value="1" />
+        </div>
+        <div class="field field-narrow">
+          <label for="fMinute">Minute</label>
+          <input type="number" id="fMinute" min="0" max="130" placeholder="e.g. 67" />
+        </div>
+        <div class="field">
+          <label for="fOpponent">Opponent</label>
+          <input type="text" id="fOpponent" placeholder="e.g. Riverside FC" />
+        </div>
+        <div class="field">
+          <label for="fCompetition">Competition</label>
+          <input type="text" id="fCompetition" placeholder="e.g. League, Cup, Friendly" />
+        </div>
+        <div class="field field-wide">
+          <label for="fNotes">Notes</label>
+          <input type="text" id="fNotes" placeholder="e.g. free kick, header, tap-in" />
+        </div>
+      </div>
+      <input type="hidden" id="fId" />
+      <div class="form-actions">
+        <button type="button" id="btnCancel" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save entry</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- FILTERS -->
+  <section class="filters">
+    <div class="field">
+      <label for="fSeason">Season</label>
+      <select id="fSeason">
+        <option value="all">All-time</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="fTypeFilter">Type</label>
+      <select id="fTypeFilter">
+        <option value="all">Goals + assists</option>
+        <option value="goal">Goals only</option>
+        <option value="assist">Assists only</option>
+      </select>
+    </div>
+    <div class="field field-search">
+      <label for="fSearch">Search</label>
+      <input type="text" id="fSearch" placeholder="Search opponent, competition or notes…" />
+    </div>
+  </section>
+
+  <!-- CHART -->
+  <section class="panel" aria-label="Scoring chart">
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow eyebrow-dark">Form guide</span>
+        <h2 id="chartTitle">Career, by season</h2>
+      </div>
+    </div>
+    <div id="chartWrap"><svg id="chartSvg" role="img" aria-labelledby="chartTitle"></svg></div>
+    <div class="legend">
+      <span class="legend-item"><i class="dot dot-goal"></i>Goals</span>
+      <span class="legend-item"><i class="dot dot-assist"></i>Assists</span>
+    </div>
+  </section>
+
+  <!-- TIMELINE RIBBON -->
+  <section class="panel" id="timelinePanel" aria-label="Season timeline">
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow eyebrow-dark">Matchday by matchday</span>
+        <h2>Season timeline</h2>
+      </div>
+    </div>
+    <p class="muted" id="timelineHint">Pick a specific season above to see when it happened, match by match.</p>
+    <div id="timelineWrap"></div>
+  </section>
+
+  <!-- LOG TABLE -->
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow eyebrow-dark">Full record</span>
+        <h2>Match log</h2>
+      </div>
+      <span class="muted" id="logCount">0 entries</span>
+    </div>
+    <div class="table-wrap">
+      <table id="logTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Qty</th>
+            <th>Opponent</th>
+            <th>Competition</th>
+            <th>Min</th>
+            <th>Notes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="logBody"></tbody>
+      </table>
+      <p id="emptyState" class="empty-state" hidden>No entries yet. Hit <strong>+ Log entry</strong> to record your first goal or assist.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-col">
+      <div class="footer-brand"><span class="brand-mark">⚽</span> Striker's Log</div>
+      <p class="muted">A private, personal record of every goal and assist you log — no accounts, no ads, no server.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Data &amp; privacy</h3>
+      <p class="muted">Everything is stored only in this browser (<code>localStorage</code>). Use <strong>Export backup</strong> regularly to keep a copy safe, and <strong>Import backup</strong> to bring it to another device.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Season status</h3>
+      <p class="muted" id="footerStatus">No entries logged yet.</p>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© <span id="footerYear"></span> Striker's Log — a personal stats tracker.</span>
+  </div>
+</footer>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
